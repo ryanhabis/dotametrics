@@ -73,22 +73,43 @@ export default async function HeroPage({
           {itemPopularity &&
             ['start_game_items', 'early_game_items', 'mid_game_items', 'late_game_items'].map(category => {
               const items = itemPopularity?.[category];
-              return Array.isArray(items) && items.length > 0 ? (
+              const itemList = items && typeof items === 'object'
+                ? Object.values(items).flatMap((arr: any) => Array.isArray(arr) ? arr : [])
+                : Array.isArray(items)
+                ? items
+                : [];
+              return itemList.length > 0 ? (
                 <div key={category} className="mb-4">
                   <h3 className="font-semibold capitalize mb-1 text-gray-600">{category.replace(/_/g, ' ')}</h3>
                   <div className="flex flex-wrap gap-2">
-                    {items.map((item: string) => (
-                      <img
-                        key={item}
-                        src={`https://cdn.cloudflare.steamstatic.com/apps/dota2/images/items/${item}_lg.png`}
-                        alt={item}
-                        className="w-10 h-10 rounded border bg-gray-800"
-                      />
-                    ))}
+                    {itemList
+                      .filter((item: string) => !!item && typeof item === 'string')
+                      .map((item: string) => (
+                        <img
+                          key={item}
+                          src={`https://cdn.cloudflare.steamstatic.com/apps/dota2/images/items/${item}_lg.png`}
+                          alt={item}
+                          className="w-10 h-10 rounded border bg-gray-800"
+                        />
+                      ))}
                   </div>
                 </div>
               ) : null;
             })}
+          {/* Show a message if no items found */}
+          {['start_game_items', 'early_game_items', 'mid_game_items', 'late_game_items'].every(
+            category => {
+              const items = itemPopularity?.[category];
+              const itemList = items && typeof items === 'object'
+                ? Object.values(items).flatMap((arr: any) => Array.isArray(arr) ? arr : [])
+                : Array.isArray(items)
+                ? items
+                : [];
+              return itemList.length === 0;
+            }
+          ) && (
+            <div className="text-gray-400 italic">No recommended items found for this hero.</div>
+          )}
         </div>
 
         {/* Example: Popular Builds (static or from API) */}
